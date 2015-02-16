@@ -48,20 +48,20 @@ lat = input1.variables['lat'][:]
 #Get desired variable into numpy array
 for i in range(192):
 	for j in range(94):		
-		ex1 = input1.variables['uas'][:,i,j]
-		ex2 = input2.variables['uas'][:,i,j]
-		ex3 = input3.variables['uas'][:,i,j]
-		ex4 = input1.variables['uas'][:,i,j]
+		ex1 = input1.variables['uas'][:,j,i]
+		ex2 = input2.variables['uas'][:,j,i]
+		ex3 = input3.variables['uas'][:,j,i]
+		ex4 = input1.variables['uas'][:,j,i]
 		ex5 = input1.variables['uas'][:,i,j]
-		ex6 = input1.variables['uas'][:,i,j]
-		target = target1.variables['uwnd'][:,0,i,j]
+		ex6 = input1.variables['uas'][:,j,1]
+		target = target1.variables['uwnd'][:,0,j,i]
 		example = np.vstack((ex1, ex2, ex3, ex4, ex5, ex6))	
 		example=example.transpose()
 		target=target.reshape(-1,1)
 		
 #Compare against MME	(DOESNT WORK)!!!
 #		
-#		mme=(((target-np.mean(example,0))^2)/2)
+		mme=np.mean(example,1)
 #		print "MME MSE {}".format(mme)
 		
 # Get data shapes for pybrain	
@@ -119,7 +119,7 @@ for i in range(192):
 
 # Train Network until convergence
 		print "training unitl convergence on lon {} and lat {}".format(lon[i], lat[j])
-		train_mse, validation_mse = trainer.trainUntilConvergence( verbose = True, validationProportion = validation_proportion, maxEpochs = epochs, continueEpochs = continue_epochs )
+		#train_mse, validation_mse = trainer.trainUntilConvergence( verbose = True, validationProportion = validation_proportion, maxEpochs = epochs, continueEpochs = continue_epochs )
 		print " train mse, validation mse".format(train_mse, validation_mse)
 
 	
