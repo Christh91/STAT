@@ -4,7 +4,6 @@ import numpy as np
 import cPickle as pickle
 from math import sqrt
 from netCDF4 import Dataset  # http://code.google.com/p/netcdf4-python/
-import matplotlib.pyplot as plt
 #from mpl_toolkits.basemap import Basemap, addcyclic, shiftgrid
 from pybrain.datasets.supervised import SupervisedDataSet as SDS
 from pybrain.tools.shortcuts import buildNetwork

@@ -3,70 +3,66 @@ import scipy as sci
 import numpy as np
 import cPickle as pickle
 from math import sqrt
-import pprint
+from netCDF4 import Dataset  # http://code.google.com/p/netcdf4-python/
 from pybrain.datasets.supervised import SupervisedDataSet as SDS
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.tools.validation    import testOnSequenceData
 from pybrain.structure import TanhLayer
 
+
+
+
+# Test input from netCDF4
 #Declare inputs and traget 
 
 
-
-
-target_file = './../data/orig/csv/huss_NCEP2_197901-200512.csv'
-
-input_file1 = './../data/orig/csv/vas_remap_Amon_CNRM-CM5_historical_r1i1p1_197901-200512.csv'
-input_file2 = './../data/orig/csv/vas_remap_Amon_GFDL-CM3_historical_r1i1p1_197901-200512.csv'
-input_file3 = './../data/orig/csv/vas_remap_Amon_IPSL-CM5A-LR_historical_r1i1p1_197901-200512.csv'
-input_file4 = './../data/orig/csv/vas_remap_Amon_MIROC-ESM_historical_r1i1p1_197901-200512.csv'
-input_file5 = './../data/orig/csv/vas_remap_Amon_MIROC5_historical_r5i1p1_197901-200512.csv'
-input_file6 = './../data/orig/csv/vas_remap_Amon_NorESM1-M_historical_r1i1p1_197901-200512.csv'
-
-
-target_file = './../data/orig/csv/vas_NCEP2_197901-200512.csv'
-
+input_file1 = '/Users/Chris/SLA/stat/data/orig/vas_remap_Amon_CNRM-CM5_historical_r1i1p1_197901-200512.nc'
+input_file2 = '/Users/Chris/SLA/stat/data/orig/vas_remap_Amon_GFDL-CM3_historical_r1i1p1_197901-200512.nc'
+input_file3 = '/Users/Chris/SLA/stat/data/orig/vas_remap_Amon_IPSL-CM5A-LR_historical_r1i1p1_197901-200512.nc'
+input_file4 = '/Users/Chris/SLA/stat/data/orig/vas_remap_Amon_MIROC-ESM_historical_r1i1p1_197901-200512.nc'
+input_file5 = '/Users/Chris/SLA/stat/data/orig/vas_remap_Amon_MIROC5_historical_r5i1p1_197901-200512.nc'
+input_file6 = '/Users/Chris/SLA/stat/data/orig/vas_remap_Amon_NorESM1-M_historical_r1i1p1_197901-200512.nc'
+target_file = '/Users/Chris/SLA/stat/data/orig/vas_NCEP2_197901-200512.nc'
 output_model = 'model.pkl'
 
-#Load data
+#Load data examples
 
-input1 = np.genfromtxt( input_file1) 
-input2 = np.genfromtxt( input_file2)
-input3 = np.genfromtxt( input_file3)
-input4 = np.genfromtxt( input_file4)
-input5 = np.genfromtxt( input_file5)
-input6 = np.genfromtxt( input_file6)
-target = np.genfromtxt( target_file, delimiter=",")
+input1 = Dataset(input_file1, 'r')
+input2 = Dataset(input_file2, 'r')
+input3 = Dataset(input_file3, 'r')
+input4 = Dataset(input_file4, 'r')
+input5 = Dataset(input_file5, 'r')
+input6 = Dataset(input_file6, 'r')
+target1 = Dataset(target_file, 'r')
 
-hidden_size = 100
-epochs = 5000
-continue_epochs = 50	
-validation_proportion = 0.1825
+#Load lat and lon as arrays for indexing
+
+lon = input1.variables['lon'][:]
+lat = input1.variables['lat'][:]
 
 
-j=108
-x1=[[]]*324
-x2=[[]]*324
-x3=[[]]*324
-x4=[[]]*324
-x5=[[]]*324
-x6=[[]]*324
-y=[[]]*324
-for i in range(0,324):
-	t=(59+(i*94))
-	x1[i]=input1[t][j]
-	x2[i]=input2[t][j]
-	x3[i]=input3[t][j]
-	x4[i]=input4[t][j]
-	x5[i]=input5[t][j]
-	x6[i]=input6[t][j]
-	y[i]=target[t][j]
 
-x = np.vstack((x1, x2, x3, x4, x5, x6))	
-x=x.transpose()
-y=np.asarray(y)
-target=y.reshape(-1,1)
+#Get desired variable into numpy array
+for i in range(103,114):
+	for j in range(30,41):		
+		ex1 = input1.variables['vas'][:,j,i]
+		ex2 = input2.variables['vas'][:,j,i]
+		ex3 = input3.variables['vas'][:,j,i]
+		ex4 = input1.variables['vas'][:,j,i]
+		ex5 = input1.variables['vas'][:,j,i]
+		ex6 = input1.variables['vas'][:,j,i]
+		target = target1.variables['vwnd'][:,0,j,i]
+		example = np.vstack((ex1, ex2, ex3, ex4, ex5, ex6))	
+		example=example.transpose()
+		target=target.reshape(-1,1)
+		
+#Compare MSE against MME MSE	(DOESNT WORK)!!!
+#		
+		mmemse=np.mean((target-(np.mean(example,1)))**2)
+		print "MME MSE {}".format(mmemse)
+		
+# Get data shapes for pybrain	
 
 input_size = x.shape[1]
 target_size = target.shape[1]
@@ -80,7 +76,7 @@ ds.setField( 'target', target )
 # init and train
 
 net = buildNetwork( input_size, hidden_size, target_size, bias= True, recurrent=True)
-trainer = BackpropTrainer( net,ds,learningrate=0.00001, batchlearning=False, verbose=True )
+trainer = BackpropTrainer( net,ds,learningrate=0.00001, batchlearning=False, verbose=False )
 
 print "training for {} epochs...".format( epochs )
 
