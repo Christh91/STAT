@@ -63,55 +63,63 @@ for i in range(103,114):
 		print "MME MSE {}".format(mmemse)
 		
 # Get data shapes for pybrain	
+		
+		input_size = example.shape[1]
+		target_size = target.shape[1]
 
-input_size = x.shape[1]
-target_size = target.shape[1]
+# prepare dataset for pybrain
 
-# prepare dataset
+		ds = SDS( input_size, target_size )
+		ds.setField( 'input', example )
+		ds.setField( 'target', target )
 
-ds = SDS( input_size, target_size )
-ds.setField( 'input', x )
-ds.setField( 'target', target )
+# Declare some scalar variables
+		hidden_size = 100
+		epochs = 1000
+		continue_epochs = 10	
+		validation_proportion = 0.1825
 
-# init and train
 
-net = buildNetwork( input_size, hidden_size, target_size, bias= True, recurrent=True)
-trainer = BackpropTrainer( net,ds,learningrate=0.00001, batchlearning=False, verbose=False )
+# Initialize network
 
-print "training for {} epochs...".format( epochs )
-
-#for i in range( 3):
-#	mse = trainer.train()
-#	rmse = sqrt( mse )
-#	print "training RMSE, epoch {}: {}".format( i + 1, rmse )
-#	trainer.testOnData(verbose=True)
-	
-#	for mod in net.modules:
-#		print "Module:", mod.name
-#		if mod.paramdim > 0:
-#			print "--parameters:", mod.params
-#		for conn in net.connections[mod]:
-#			print "-connection to", conn.outmod.name
-#			if conn.paramdim > 0:
-#				print "- parameters", conn.params
-#		if hasattr(net, "recurrentConns"):
-#			print "Recurrent connections"
-#			for conn in net.recurrentConns:             
-#				print "-", conn.inmod.name, " to", conn.outmod.name
-#				if conn.paramdim > 0:
-#					print "- parameters", conn.params
-#					for cc in range(len(conn.params)):
-#						print conn.whichNeuron[cc], conn.params[cc]
-#						
-#	#pp = pprint.PrettyPrinter(indent=4) 
-#	#pp.pprint( net['hidden0'].__dict__)	
+		net = buildNetwork( input_size, hidden_size, target_size, hiddenclass=TanhLayer, bias= True, recurrent=True)
+		trainer = BackpropTrainer( net,ds,learningrate=0.001, weightdecay=0.1, batchlearning=False, verbose=False )
 
 
 
-train_mse, validation_mse = trainer.trainUntilConvergence( verbose = True, validationProportion = validation_proportion, 
-	maxEpochs = epochs, continueEpochs = continue_epochs )
-	
+# For single epoch training and testing
+
+#		print "training for {} epochs...".format( epochs )
+#		for i in range( 1):
+#			mse = trainer.train()
+#			rmse = sqrt( mse )
+#			print "training RMSE, epoch {}: {}".format( i + 1, rmse )
+#			trainer.testOnData(verbose=True)
+#	
+		
+# Outputs weight parameters but unsure how to use
+		
+		#	for mod in net.modules:
+		#		print "Module:", mod.name
+		#		if mod.paramdim > 0:
+		#			print "--parameters:", mod.params
+		#		for conn in net.connections[mod]:
+		#			if conn.paramdim > 0:
+		#				print "- parameters", conn.params
+		#		if hasattr(net, "recurrentConns"):
+		#			print "Recurrent connections"
+		#			for conn in net.recurrentConns:             
+		#				print "-", conn.inmod.name, " to", conn.outmod.name
+		#				if conn.paramdim > 0:
+		#					print "- parameters", conn.params
+		#					for cc in range(len(conn.params)):
+		#						print conn.whichNeuron[cc], conn.params[cc]
+
+# Train Network until convergence
+		print "training unitl convergence on lon {} and lat {}".format(lon[i], lat[j])
+		train_mse, validation_mse = trainer.trainUntilConvergence( verbose = True, validationProportion = validation_proportion, maxEpochs = epochs, continueEpochs = continue_epochs )
+		print " train mse, validation mse".format(train_mse, validation_mse)
 
 	
 		
-pickle.dump( net, open( output_model, 'wb' ))
+		pickle.dump( net, open( output_model, 'wb' ))

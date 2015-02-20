@@ -54,8 +54,8 @@ for i in range(103,114):
 		ex6 = input1.variables['huss'][:,j,i]
 		target = target1.variables['shum'][:,0,j,i]
 		example = np.vstack((ex1, ex2, ex3, ex4, ex5, ex6))	
-		example=example.transpose()
-		target=target.reshape(-1,1)
+		example=(example.transpose()*1000)
+		target=(target.reshape(-1,1)*1000)
 		
 #Compare MSE against MME MSE	(DOESNT WORK)!!!
 #		

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 # Load Data
-input_file1= './hawaii_uas_pc.csv'
+input_file1= './hawaii_uas_nnrmse.csv'
 pcrmse=np.genfromtxt(input_file1, delimiter=",")
 
 
@@ -24,7 +24,7 @@ m = Basemap(projection='cea',llcrnrlat=12,urcrnrlat=30,\
 
 cs=m.imshow(pcrmse)
 cbar = plt.colorbar(cs, orientation='horizontal')
-cbar.set_label('%')
+cbar.set_label('m/s')
 m.drawstates()
 m.drawcoastlines()
 m.fillcontinents(color='coral',lake_color='aqua')
@@ -32,5 +32,5 @@ m.fillcontinents(color='coral',lake_color='aqua')
 m.drawparallels(np.arange(12.,30,1.875),labels=[1,0,0,0],fontsize=10)
 m.drawmeridians(np.arange(-166.,-148.,3.75),labels=[0,0,0,1],fontsize=10)
 m.drawmapboundary(fill_color='aqua')
-plt.title("Percent Change in RMSE Over WRF Outer Domain")
+plt.title("NN's Calculated U10 RMSE Over WRF Outer Domain")
 plt.show()
